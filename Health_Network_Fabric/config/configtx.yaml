@@ -1,0 +1,181 @@
+Organizations:
+  - &OrdererOrg
+    Name: OrdererOrg
+    ID: OrdererMSP
+    MSPDir: ../organizations/ordererOrganizations/healthnetwork.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OrdererMSP.admin')"
+    OrdererEndpoints:
+      - orderer.healthnetwork.com:7050
+
+  - &Hospital
+    Name: HospitalMSP
+    ID: HospitalMSP
+    MSPDir: ../organizations/peerOrganizations/hospital.healthnetwork.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('HospitalMSP.admin', 'HospitalMSP.peer', 'HospitalMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('HospitalMSP.admin', 'HospitalMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('HospitalMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('HospitalMSP.peer')"
+
+  - &Pharmacy
+    Name: PharmacyMSP
+    ID: PharmacyMSP
+    MSPDir: ../organizations/peerOrganizations/pharmacy.healthnetwork.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('PharmacyMSP.admin', 'PharmacyMSP.peer', 'PharmacyMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('PharmacyMSP.admin', 'PharmacyMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('PharmacyMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('PharmacyMSP.peer')"
+
+  - &Insurance
+    Name: InsuranceMSP
+    ID: InsuranceMSP
+    MSPDir: ../organizations/peerOrganizations/insurance.healthnetwork.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('InsuranceMSP.admin', 'InsuranceMSP.peer', 'InsuranceMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('InsuranceMSP.admin', 'InsuranceMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('InsuranceMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('InsuranceMSP.peer')"
+
+  - &Laboratory
+    Name: LaboratoryMSP
+    ID: LaboratoryMSP
+    MSPDir: ../organizations/peerOrganizations/laboratory.healthnetwork.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('LaboratoryMSP.admin', 'LaboratoryMSP.peer', 'LaboratoryMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('LaboratoryMSP.admin', 'LaboratoryMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('LaboratoryMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('LaboratoryMSP.peer')"
+
+
+Capabilities:  
+  Channel: &ChannelCapabilities
+    V2_0: true
+  Orderer: &OrdererCapabilities
+    V2_0: true
+  Application: &ApplicationCapabilities
+    V2_5: true
+    
+Application: &ApplicationDefaults
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+  Addresses:
+    - orderer.healthnetwork.com:7050
+  BatchTimeout: 2s
+  BatchSize:
+    MaxMessageCount: 10
+    AbsoluteMaxBytes: 99 MB
+    PreferredMaxBytes: 512 KB
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities:
+    <<: *ChannelCapabilities
+
+Profiles:
+  ChannelUsingRaft:
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      OrdererType: etcdraft
+      EtcdRaft:
+        Consenters:
+          - Host: orderer.healthnetwork.com
+            Port: 7050
+            ClientTLSCert: ../organizations/ordererOrganizations/healthnetwork.com/orderers/orderer.healthnetwork.com/tls/server.crt
+            ServerTLSCert: ../organizations/ordererOrganizations/healthnetwork.com/orderers/orderer.healthnetwork.com/tls/server.crt
+      Organizations:
+        - *OrdererOrg
+      Capabilities: *OrdererCapabilities
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *Hospital
+        - *Pharmacy
+        - *Insurance
+        - *Laboratory
+
+      Capabilities: *ApplicationCapabilities

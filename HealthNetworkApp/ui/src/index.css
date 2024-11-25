@@ -1,0 +1,30 @@
+/* index.css */
+
+/* Tailwind Base Styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Global Styles (if needed) */
+
+/* Body styles */
+body {
+    font-family: 'Inter', sans-serif;
+    /* You can add Google Fonts if you wish */
+    background-color: #f7fafc;
+    /* Light background for the app */
+}
+
+/* Container Padding */
+.container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* Additional Custom Styling */
+a {
+    text-decoration: none;
+    /* Remove default link underline */
+}
+
+/* You can also add custom components like buttons or card styles here */
