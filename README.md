@@ -85,8 +85,3 @@ The system consists of:
 
 ---
 
-## Usage
-### Deploy the Chaincode
-1. Package the chaincode:
-   ```bash
-   peer lifecycle chaincode package healthcare.tar.gz --path . --lang node --label healthcare
